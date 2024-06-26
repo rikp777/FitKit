@@ -1,0 +1,21 @@
+server:
+  port: 8070
+
+spring:
+  datasource:
+    url: jdbc:sqlserver://localhost:1433;databaseName=customer;trustServerCertificate=true
+    username: rikp
+    password: VerYsup3rS3cr3T!
+    driver-class-name: com.microsoft.sqlserver.jdbc.SQLServerDriver
+  jpa:
+    hibernate:
+      ddl-auto: update
+    database: SQL_SERVER
+    database-platform: org.hibernate.dialect.SQLServer2012Dialect
+  eureka:
+    client:
+      service-url:
+        defaultZone: http://localhost:8761/eureka/
+  springdoc:
+    swagger-ui:
+      path: /docs.html

@@ -1,0 +1,211 @@
+@startuml
+skinparam style strictuml
+
+package user {
+    class User {
+      +String id
+      +String username
+      +List<Preference> preferences
+      +List<Allergy> allergies
+      +List<rating> ratings
+    }
+
+    class FoodPreference {
+      +FoodItem allergen
+    }
+
+    class FoodAllergy {
+      +FoodItem allergen
+    }
+
+    User "1" -- "*" FoodPreference : has >
+    User "1" -- "*" FoodAllergy : has >
+
+}
+
+package userActivity {
+    class UserStreak {
+        +String id
+        +Date startDate
+        +Date endDate
+        +String type
+        +Integer currentStreakCount
+    }
+
+    class UserAchievement {
+        +String id
+        +Date earnedDate
+        +Achievement achievement
+    }
+
+    class MealPlan {
+        +Date date
+        +List<Recipe> recipes
+    }
+
+    class WorkoutPlan {
+        +Date date
+        +List<Workout> workouts
+    }
+
+    class RecipeRating {
+      +Recipe recipe
+      +Integer rating
+    }
+
+    User "1" -- "*" UserStreak : has >
+    User "1" -- "*" UserAchievement : earns >
+    User "1" -- "*" MealPlan : plans >
+    User "1" -- "*" WorkoutPlan : follows >
+    User "1" -- "*" RecipeRating : rates >
+}
+
+package gamification {
+    class Badge {
+        +String name
+        +String description
+    }
+
+    class Achievement {
+        +String id
+        +String name
+        +String description
+    }
+
+    Achievement "1" -- "*" Badge : grants >
+    UserAchievement "1" -- "*" Achievement : corresponds to >
+}
+
+package workout {
+    class Workout {
+      +String id
+      +String name
+      +String description
+      +String imageUrl
+      +List<Exercise> exercises
+      +List<WorkoutPlan> workoutPlans
+    }
+
+    class Exercise {
+      +String name
+      +String description
+      +String imageUrl
+      +List<MuscleGroup> muscleGroups
+      +List<Workout> relatedWorkouts
+    }
+
+    class MuscleGroup {
+      +String name
+      +String description
+    }
+
+    Workout "1" -- "*" Exercise : includes >
+    Exercise "n" -- "n" MuscleGroup : targets >
+    Workout "1" -- "*" WorkoutPlan : plans >
+
+}
+package food {
+    class FoodItem {
+      +String id
+      +String name
+      +String description
+      +String imageUrl
+      +NutritionalInfo nutrition
+      +List<Category> categories
+    }
+
+    class Category {
+      +String name
+      +String description
+    }
+
+    class NutritionalInfo {
+      +Integer calories
+      +Float carbs
+      +Float protein
+      +Float fats
+      +Map vitamins
+      +Map minerals
+    }
+
+    class ScientificArticle {
+      +String title
+      +String publicationDate
+      +String summary
+      +List<FoodItem> relatedFoods
+      +List<Recipe> relatedRecipes
+    }
+
+    FoodItem "1" *-down- "1" NutritionalInfo : has >
+    FoodItem "n" -- "n" Category : belongs to >
+    FoodItem "n" -- "m" ScientificArticle : referenced in >
+}
+
+package cooking {
+    class Recipe {
+      +String title
+      +String imageUrl
+      +DifficultyLevel difficultyLevel
+      +String[] instructions
+      +List<Ingredient> ingredients
+      +List<Category> categories
+      +Float averageRating
+    }
+
+    class Ingredient {
+      +FoodItem foodItem
+      +CookingDetail cookingDetail
+      +NutritionalInfo adjustedNutrition
+    }
+
+    class CookingDetail {
+      +CookingMethod method
+      +Integer cookingTime
+      +Temperature cookingTemperature
+    }
+
+    class CookingMethod {
+      +String name
+      +String description
+      +NutritionalAdjustment adjustments
+    }
+
+    class NutritionalAdjustment {
+      +Map<String, Float> vitaminAdjustments
+      +Map<String, Float> mineralAdjustments
+      +Float calorieAdjustment
+    }
+
+    enum DifficultyLevel {
+      Easy
+      Medium
+      Hard
+    }
+
+    class Temperature {
+      +Integer degreeCelsius
+      +String type
+    }
+
+    Ingredient "1" -down- "1" CookingDetail : has details >
+    CookingDetail "1" -left- "0..1" CookingMethod : uses >
+    Recipe "n" -- "m" Ingredient : includes >
+    CookingMethod "1" -- "1" NutritionalAdjustment : adjustments >
+    CookingDetail "1" -down- "1" Temperature : at >
+}
+
+Ingredient "n" -- "1" FoodItem : contains >
+Ingredient "1" -down- "1" NutritionalInfo : adjusted >
+FoodAllergy "*" -- "1" FoodItem : allergic to >
+FoodPreference "*" -- "1" FoodItem : prefers >
+MealPlan "*" -- "n" Recipe : includes >
+RecipeRating "*" -- "1" Recipe : rates >
+
+note bottom of userActivity
+  Splitting User and UserActivity follows DDD best practices by:
+  - Enhancing separation of concerns
+  - Improving modularity and reusability
+  - Facilitating scalability
+  - Increasing clarity and focus
+end note
+@enduml

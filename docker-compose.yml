@@ -1,0 +1,78 @@
+services:
+  database-dev:
+    container_name: mssql
+    build:
+      context: .init/mssql
+      dockerfile: Dockerfile
+    environment:
+      ACCEPT_EULA: Y
+      SA_PASSWORD: ${DATABASE_DEV_PASSWORD}
+      MSSQL_USER: ${DATABASE_DEV_USERNAME}
+      MSSQL_PASSWORD: ${DATABASE_DEV_PASSWORD}
+
+    ports:
+      - "1433:1433"
+
+    volumes:
+      - ${DATABASE_DEV_VOLUME}:/var/opt/mssql/data
+
+    networks:
+      - microservices
+
+    restart: on-failure
+    deploy:
+      restart_policy:
+        condition: on-failure
+        max_attempts: 3
+
+  mail-dev:
+    container_name: mail-dev
+    image: maildev/maildev
+    ports:
+      - "1080:1080"
+      - "1025:1025"
+
+  zookeeper:
+    container_name: zookeeper
+    image: confluentinc/cp-zookeeper:latest
+    environment:
+      ZOOKEEPER_SERVER_ID: 1
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
+    ports:
+      - "2181:2181"
+
+    networks:
+      - microservices
+
+  kafka:
+    container_name: kafka
+    image: confluentinc/cp-kafka:latest
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://localhost:9092
+
+    ports:
+      - "9092:9092"
+
+    networks:
+      - microservices
+
+  zipkin:
+    image: openzipkin/zipkin
+    container_name: zipkin
+    ports:
+      - "9411:9411"
+
+networks:
+  microservices:
+    driver: bridge
+
+volumes:
+  database-dev-vol:
+    name: ${DATABASE_DEV_VOLUME}
