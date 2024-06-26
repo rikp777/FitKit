@@ -14,6 +14,7 @@ public record CustomerResponse(
         String phone,
         FoodPreferenceGroupsResponse foodPreferenceGroups,
         List<FoodAllergyResponse> foodAllergies,
-        SettingsResponse settings
+        SettingsResponse settings,
+        List<StreakResponse> streaks
 ) {
 }

@@ -1,15 +1,21 @@
 package nl.rikp.customerService.mapper;
 
+import lombok.RequiredArgsConstructor;
 import nl.rikp.customerService.dto.*;
 import nl.rikp.customerService.model.*;
+import nl.rikp.customerService.repository.StreakRepository;
 import org.springframework.stereotype.Component;
+
+import java.util.Collections;
+import java.util.List;
 
 /**
  * Component for mapping between Customer entities and DTOs.
  */
 @Component
+@RequiredArgsConstructor
 public class CustomerMapper {
-
+    private final StreakRepository streakRepository;
     /**
      * Creates default settings for a given customer.
      *
@@ -65,6 +71,11 @@ public class CustomerMapper {
 
         var foodAllergies = customer.getFoodAllergies().stream().map(this::fromFoodAllergy).toList();
 
+        List<Streak> activeStreaks = streakRepository.findActiveStreaksByCustomerId(customer.getId());
+        List<StreakResponse> streaks = (activeStreaks == null || activeStreaks.isEmpty()) ?
+                Collections.singletonList(new StreakResponse("No active streak", "0")) :
+                activeStreaks.stream().map(StreakResponse::fromStreak).toList();
+
         return new CustomerResponse(
                 customer.getId(),
                 customer.getFirstName(),
@@ -79,7 +90,8 @@ public class CustomerMapper {
                         customer.getSettings().isNotificationsEnabled(),
                         customer.getSettings().getLanguage(),
                         customer.getSettings().getItemsPerPage()
-                ) : null
+                ) : null,
+                streaks
         );
     }
 

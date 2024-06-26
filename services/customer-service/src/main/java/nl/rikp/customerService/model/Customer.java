@@ -51,6 +51,10 @@ public class Customer {
     @Builder.Default
     private List<RecipeRating> ratings = new ArrayList<>();
 
+    @OneToMany(mappedBy = "customer", cascade = CascadeType.ALL, orphanRemoval = true)
+    @Builder.Default
+    private List<Streak> streaks = new ArrayList<>();
+
     @Enumerated(EnumType.STRING)
     @Column(name = "language", nullable = false)
     @NotNull(message = "Language cannot be null")
