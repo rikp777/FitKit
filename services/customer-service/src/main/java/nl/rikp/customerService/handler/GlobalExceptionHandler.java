@@ -3,6 +3,7 @@ package nl.rikp.customerService.handler;
 import lombok.extern.slf4j.Slf4j;
 import nl.rikp.customerService.dto.ErrorResponse;
 import nl.rikp.customerService.exception.PremiumFeatureException;
+import nl.rikp.customerService.exception.StreakEmptyException;
 import nl.rikp.customerService.exception.notFound.CustomerNotFoundException;
 import nl.rikp.customerService.exception.notFound.FoodPreferenceNotFoundException;
 import org.springframework.http.HttpStatus;
@@ -18,6 +19,26 @@ import java.util.Map;
 @Slf4j
 public class GlobalExceptionHandler extends RecipeRatingExceptionHandler{
     private final String ERROR_CODE_PREFIX = "ERR::";
+
+    @ExceptionHandler(StreakEmptyException.class)
+    public ResponseEntity<ErrorResponse> handleStreakEmptyException(StreakEmptyException e) {
+        log.error("Controller advise: Streak empty exception: {}", e.getMessage());
+
+        var errorStatus = HttpStatus.NOT_FOUND;
+        var messageTitle = errorStatus.getReasonPhrase();
+        var messageDescription = e.getMessage();
+        var errorCode = ERROR_CODE_PREFIX + errorStatus.value();
+
+        var errorResponse = ErrorResponse.builder()
+                .code(errorCode)
+                .message(messageTitle + ":: " + messageDescription)
+                .build();
+
+        return ResponseEntity
+                .status(errorStatus)
+                .body(errorResponse);
+    }
+
 
     @ExceptionHandler(PremiumFeatureException.class)
     public ResponseEntity<ErrorResponse> handlePremiumFeatureException(PremiumFeatureException e) {
@@ -140,22 +161,22 @@ public class GlobalExceptionHandler extends RecipeRatingExceptionHandler{
     }
 
 
-    @ExceptionHandler(Exception.class)
-    public ResponseEntity<ErrorResponse> handleGeneralException(Exception e) {
-        log.error("Controller advise: Unexpected error: {}", e.getMessage());
-
-        var errorStatus = HttpStatus.INTERNAL_SERVER_ERROR;
-        var messageTitle = errorStatus.getReasonPhrase();
-        var messageDescription = "An unexpected error occurred. Please try again later";
-        var errorCode = ERROR_CODE_PREFIX + HttpStatus.INTERNAL_SERVER_ERROR.value();
-
-        var errorResponse = ErrorResponse.builder()
-                .code(errorCode)
-                .message(messageTitle + ":: " + messageDescription)
-                .build();
-
-        return ResponseEntity
-                .status(errorStatus)
-                .body(errorResponse);
-    }
+//    @ExceptionHandler(Exception.class)
+//    public ResponseEntity<ErrorResponse> handleGeneralException(Exception e) {
+//        log.error("Controller advise: Unexpected error: {}", e.getMessage());
+//
+//        var errorStatus = HttpStatus.INTERNAL_SERVER_ERROR;
+//        var messageTitle = errorStatus.getReasonPhrase();
+//        var messageDescription = "An unexpected error occurred. Please try again later";
+//        var errorCode = ERROR_CODE_PREFIX + HttpStatus.INTERNAL_SERVER_ERROR.value();
+//
+//        var errorResponse = ErrorResponse.builder()
+//                .code(errorCode)
+//                .message(messageTitle + ":: " + messageDescription)
+//                .build();
+//
+//        return ResponseEntity
+//                .status(errorStatus)
+//                .body(errorResponse);
+//    }
 }

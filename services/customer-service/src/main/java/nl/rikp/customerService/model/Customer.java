@@ -32,9 +32,18 @@ public class Customer {
     private String email;
     private String phone;
 
+    //todo should be updated by kafka event
+    @Column(name = "coins", nullable = false)
+    private int coins;
+
     @Enumerated(EnumType.STRING)
     @Column(name = "premium_level")
     private PremiumLevel premiumLevel;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "language", nullable = false)
+    @NotNull(message = "Language cannot be null")
+    private Language language;
 
     @OneToOne(mappedBy = "customer", cascade = CascadeType.ALL, orphanRemoval = true)
     private Settings settings;
@@ -55,10 +64,14 @@ public class Customer {
     @Builder.Default
     private List<Streak> streaks = new ArrayList<>();
 
-    @Enumerated(EnumType.STRING)
-    @Column(name = "language", nullable = false)
-    @NotNull(message = "Language cannot be null")
-    private Language language;
+    @OneToMany(mappedBy = "customer", cascade = CascadeType.ALL, orphanRemoval = true)
+    @Builder.Default
+    private List<StreakFreeze> freezes = new ArrayList<>();
+
+    //todo should be updated by kafka event
+    @OneToMany(mappedBy = "customer", cascade = CascadeType.ALL, orphanRemoval = true)
+    @Builder.Default
+    private List<CoinTransaction> coinTransactions = new ArrayList<>();
 
     public void update(CustomerRequest request){
         this.firstName = request.firstName();
@@ -118,5 +131,9 @@ public class Customer {
 
     public void addSettings(Settings settings){
         this.settings = settings;
+    }
+
+    public void subtractCoins(int coins){
+        this.coins -= coins;
     }
 }

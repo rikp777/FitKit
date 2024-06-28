@@ -21,4 +21,13 @@ public enum StreakType {
     public String toString() {
         return description;
     }
+
+    public static StreakType fromString(String description) {
+        for (StreakType type : StreakType.values()) {
+            if (type.description.equalsIgnoreCase(description)) {
+                return type;
+            }
+        }
+        throw new IllegalArgumentException("Unknown StreakType: " + description);
+    }
 }
